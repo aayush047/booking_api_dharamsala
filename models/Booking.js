@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 
 const BookingSchema = new mongoose.Schema({
     ownerId: { type: String, required: true },
+    dharamshalaId: { type: mongoose.Schema.Types.ObjectId, ref: 'Dharamshala', required: true },
     name: { type: String, required: true },
     event: { type: String, required: true },
     date: { type: String, required: true },

@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
+const Dharamshala = require('../models/Dharamshala');
 
 // Get bookings for owner
 router.get('/', async (req, res) => {
@@ -13,16 +14,21 @@ router.get('/', async (req, res) => {
 // Add booking
 router.post('/', async (req, res) => {
     try {
-        const { ownerId, name, event, date } = req.body;
-        if (!ownerId || !name || !event || !date) return res.status(400).json({ message: "All fields required" });
+        const { ownerId, dharamshalaId, name, event, date } = req.body;
+        if (!ownerId || !name || !event || !date || !dharamshalaId)
+            return res.status(400).json({ message: "All fields required" });
+
         const booking = new Booking({ ownerId, name, event, date });
         await booking.save();
+
+        // Update Dharamshala bookings count
+        await Dharamshala.findByIdAndUpdate(dharamshalaId, { $inc: { bookings: 1 } });
+
         res.status(201).json(booking);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
 // Update booking status
 router.put('/:id', async (req, res) => {
     const booking = await Booking.findById(req.params.id);
@@ -36,6 +42,10 @@ router.put('/:id', async (req, res) => {
 router.delete('/:id', async (req, res) => {
     const booking = await Booking.findByIdAndDelete(req.params.id);
     if (!booking) return res.status(404).json({ message: "Booking not found" });
+
+    // Decrement Dharamshala bookings
+    await Dharamshala.findByIdAndUpdate(booking.dharamshalaId, { $inc: { bookings: -1 } });
+
     res.json({ message: "Deleted" });
 });
 
