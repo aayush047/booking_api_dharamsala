@@ -18,7 +18,7 @@ router.post('/', async (req, res) => {
         if (!ownerId || !name || !event || !date || !dharamshalaId)
             return res.status(400).json({ message: "All fields required" });
 
-        const booking = new Booking({ ownerId, name, event, date });
+        const booking = new Booking({ ownerId, dharamshalaId, name, event, date });
         await booking.save();
 
         // Update Dharamshala bookings count
@@ -29,6 +29,7 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: err.message });
     }
 });
+
 // Update booking status
 router.put('/:id', async (req, res) => {
     const booking = await Booking.findById(req.params.id);
